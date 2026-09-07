@@ -49,7 +49,9 @@ Meet mode adds a first-race time and rebuilds around that instead.
 
 Breakfast, mid-morning and lunch are shown as words rather than clock times, because school schedules vary too much for a made-up number to be useful.
 
-No names are hardcoded anywhere in the source. Since a GitHub Pages repo is public, the athletes' names live only in each browser's local storage, never in the committed files.
+The app seeds two athletes on first load: Mia on sprints and Titus on middle distance. Those two names are in `app.js`, in the `seed()` function, which means they are visible in the public repo. Blank the two `name:` strings there if you'd rather they weren't — the app works identically, the tabs just read "Sprinter" and "Middle distance" until someone types a name in Setup.
+
+Seeding only happens on a browser that has never run the app. Once local storage exists, editing `seed()` changes nothing on that device; rename in Setup instead. Bumping `KEY_ATHLETES` to a new version string resets every device back to the seed and discards whatever was saved.
 
 ## Portions
 

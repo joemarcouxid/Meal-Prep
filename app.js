@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const KEY_ATHLETES = "fuelAthletesV3";
+  const KEY_ATHLETES = "fuelAthletesV4";
   const KEY_CART = "fuelCartV3";
 
   /* ---------- tiny helpers ---------- */
@@ -343,10 +343,13 @@
     day: DISCIPLINES[discipline].days[1].key
   });
 
+  // Seeded on first load only. After that, everything lives in this browser's
+  // local storage and editing these lines will not change a device that has
+  // already run the app — rename in Setup instead.
   function seed() {
-    const a = newAthlete("sprint");
-    const b = newAthlete("middle");
-    return { list: [a, b], active: a.id };
+    const mia = { ...newAthlete("sprint"), name: "Mia" };
+    const titus = { ...newAthlete("middle"), name: "Titus", trackCycle: false };
+    return { list: [mia, titus], active: mia.id };
   }
 
   let state = store.get(KEY_ATHLETES);
