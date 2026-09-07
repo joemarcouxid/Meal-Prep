@@ -581,13 +581,163 @@ select {
   * { animation: none !important; transition: none !important; }
 }
 
+
+/* ---------- athlete switcher ---------- */
+
+.athletebar {
+  background: var(--lane);
+  border-bottom: 1px solid var(--line-hard);
+}
+
+.athletebar-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 50px;
+  flex-wrap: wrap;
+}
+
+.athletebar-label {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--ink-soft);
+}
+
+.athletes { display: flex; gap: 6px; flex: 1; min-width: 0; flex-wrap: wrap; }
+
+.athletes button {
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 6px 14px;
+  min-height: 36px;
+  border: 1px solid var(--line-hard);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-soft);
+  max-width: 46vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.athletes button.on {
+  background: var(--track);
+  border-color: var(--track);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ---------- portions ---------- */
+
+.portions {
+  margin-top: 20px;
+  border-top: 2px solid var(--ink);
+}
+
+.portion {
+  display: grid;
+  grid-template-columns: 106px 1fr;
+  grid-template-areas: "label amount" "label eg";
+  gap: 0 20px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.portion-label {
+  grid-area: label;
+  align-self: start;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  line-height: 1.2;
+  padding-top: 2px;
+}
+
+.portion-amount {
+  grid-area: amount;
+  font-weight: 600;
+  color: var(--track-deep);
+}
+
+.portion-eg {
+  grid-area: eg;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.portion-note {
+  margin: 14px 0 0;
+  color: var(--ink-soft);
+  font-size: 0.94rem;
+  max-width: var(--measure);
+}
+
+.portion-floor {
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: var(--lane);
+  border-left: 3px solid var(--chalk);
+  font-size: 0.94rem;
+  max-width: var(--measure);
+}
+
+.hands-head { margin-top: 30px; }
+
+.hands {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hands li {
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+  color: var(--ink-soft);
+  max-width: var(--measure);
+}
+
+.hands li b {
+  display: inline-block;
+  min-width: 128px;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ---------- setup extras ---------- */
+
+.check.standalone { border-top: 0; margin-bottom: 6px; }
+
+.setup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.setup-actions .ghost.small { width: auto; }
+
+button[disabled] { opacity: 0.4; cursor: not-allowed; }
+
+@media (max-width: 620px) {
+  .portion { grid-template-columns: 84px 1fr; gap: 0 14px; }
+  .portion-label { font-size: 1.1rem; }
+  .hands li b { display: block; min-width: 0; }
+  .athletes button { max-width: 42vw; }
+  .setup-actions .solid { width: 100%; }
+}
+
 /* ---------- print ---------- */
 
 @media print {
   :root { --paper: #fff; --lane: #fff; --ink: #000; --ink-soft: #444; }
   body { font-size: 12pt; }
   .topbar { position: static; background: #fff; color: #000; border-bottom: 2px solid #000; }
-  .who, .chips, .ghost, .solid, .checkin, .groceries, #setup, .racebox { display: none !important; }
+  .who, .chips, .ghost, .solid, .checkin, .groceries, #setup, .racebox,
+  .athletebar { display: none !important; }
   .block { padding: 14px 0; break-inside: avoid; }
   .rule-callout { background: #fff; color: #000; border: 1px solid #000; }
   .rule-callout p, .formula { color: #000 !important; }

@@ -4,8 +4,8 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#C04A2B" />
-<meta name="description" content="What to eat and when, built around your practice time. For high school sprinters." />
-<title>Fuel — sprint day eating</title>
+<meta name="description" content="What to eat and when, built around your practice time. For high school sprinters and middle distance runners." />
+<title>Fuel — track day eating</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -16,25 +16,26 @@
 <header class="topbar">
   <div class="wrap topbar-inner">
     <span class="mark">Fuel</span>
-    <span class="who" id="topbarWho">Set up below</span>
+    <span class="who" id="topbarWho"></span>
     <button id="printBtn" class="ghost" type="button">Print</button>
   </div>
 </header>
+
+<div class="athletebar">
+  <div class="wrap athletebar-inner">
+    <span class="athletebar-label">Athlete</span>
+    <div class="athletes" id="athleteTabs" role="group" aria-label="Choose athlete"></div>
+    <button id="addAthlete" class="ghost small" type="button">Add</button>
+  </div>
+</div>
 
 <main>
 
   <!-- ============ TODAY ============ -->
   <section class="wrap block" id="today">
-    <div class="chips" id="dayButtons" role="group" aria-label="Pick today's training">
-      <button type="button" data-day="hard" aria-pressed="false">Hard sprints</button>
-      <button type="button" data-day="normal" aria-pressed="true" class="on">Normal practice</button>
-      <button type="button" data-day="lift" aria-pressed="false">Lift + track</button>
-      <button type="button" data-day="easy" aria-pressed="false">Easy / drills</button>
-      <button type="button" data-day="rest" aria-pressed="false">Rest</button>
-      <button type="button" data-day="meet" aria-pressed="false">Meet</button>
-    </div>
+    <div class="chips" id="dayButtons" role="group" aria-label="Pick today's training"></div>
 
-    <h1 id="dayTitle">Standard fuel day</h1>
+    <h1 id="dayTitle"></h1>
     <p class="lede" id="dayNote"></p>
 
     <div class="racebox" id="raceBox" hidden>
@@ -48,6 +49,25 @@
   <section class="wrap block">
     <div class="rail" id="rail"></div>
     <p class="footnote" id="railNote"></p>
+  </section>
+
+  <!-- ============ PORTIONS ============ -->
+  <section class="wrap block bordered">
+    <h2>Roughly how much, today</h2>
+    <p class="lede" id="portionLede"></p>
+
+    <div class="portions" id="portions"></div>
+
+    <p class="portion-floor">Everything here is a floor, not a ceiling. If you're still hungry after eating this, eat more. Hunger after training is information, not a test you failed.</p>
+
+    <h3 class="hands-head">What the hand sizes mean</h3>
+    <ul class="hands">
+      <li><b>Cupped hand</b> Roughly what fits in one cupped palm. Rice, pasta, cereal, potatoes.</li>
+      <li><b>Palm</b> The size and thickness of your own palm, fingers not counted. Chicken, beef, fish.</li>
+      <li><b>Fist</b> One closed fist. Fruit and vegetables.</li>
+      <li><b>Thumb</b> The length and width of your thumb. Butter, oil, peanut butter, cheese.</li>
+    </ul>
+    <p class="footnote">Your hands scale with you, which is the whole point of measuring this way. A 15-year-old and an 18-year-old get different amounts from the same instruction, and neither one has to count anything.</p>
   </section>
 
   <!-- ============ PLATE RULE ============ -->
@@ -85,8 +105,11 @@
       </label>
 
       <label class="check"><input id="sore" type="checkbox" /><span>Sorer than usual, or staying sore longer</span></label>
-      <label class="check"><input id="cold" type="checkbox" /><span>Cold a lot, or trouble sleeping</span></label>
-      <label class="check"><input id="cycle" type="checkbox" /><span>Periods have gotten irregular or stopped</span></label>
+      <label class="check"><input id="sleep" type="checkbox" /><span>Sleeping badly, or cold all the time</span></label>
+      <label class="check"><input id="sick" type="checkbox" /><span>Getting sick more often than normal</span></label>
+      <label class="check"><input id="bone" type="checkbox" /><span>Shin, foot or hip pain that won't settle down</span></label>
+      <label class="check"><input id="strength" type="checkbox" /><span>Going backwards in the weight room</span></label>
+      <label class="check" id="cycleRow"><input id="cycle" type="checkbox" /><span>Periods have gotten irregular or stopped</span></label>
       <label class="check"><input id="performanceDrop" type="checkbox" /><span>Times have been getting slower</span></label>
 
       <button id="assessBtn" class="solid" type="button">Check</button>
@@ -105,7 +128,7 @@
             <th scope="col">Day</th>
             <th scope="col">Breakfast</th>
             <th scope="col">Lunch</th>
-            <th scope="col">Before practice</th>
+            <th scope="col">Before training</th>
             <th scope="col">Right after</th>
             <th scope="col">Dinner</th>
           </tr>
@@ -119,28 +142,21 @@
   <section class="wrap block bordered">
     <h2>Meet day</h2>
     <p class="lede">One rule above all others: nothing new. If you haven't eaten it before a practice, don't eat it before a race.</p>
-    <ol class="meet">
-      <li><b>3–4 hours out</b> Bagel with jam, two eggs, banana, yogurt, water. Your real meal of the day.</li>
-      <li><b>60–90 min out</b> Banana, applesauce, pretzels, or half a bagel. Small and simple.</li>
-      <li><b>Under 90 min between races</b> Sports drink plus applesauce, banana, crackers, or pretzels.</li>
-      <li><b>2+ hours between races</b> Small turkey sandwich, a bagel, or a modest chicken and rice.</li>
-      <li><b>After your last race</b> Chocolate milk and a banana, or anything with carbs and protein.</li>
-      <li><b>Within 2 hours</b> A full meal. Carbs, protein, produce, fluids.</li>
-    </ol>
+    <ol class="meet" id="meetGuide"></ol>
   </section>
 
   <!-- ============ GROCERIES ============ -->
   <section class="wrap block bordered">
     <h2>Shopping list</h2>
-    <p class="lede">Tap to cross things off. Saved on this device only.</p>
+    <p class="lede">Tap to cross things off. Shared by both athletes, saved on this device only.</p>
     <div id="groceryList" class="groceries"></div>
     <button id="resetGroceries" class="ghost small" type="button">Clear list</button>
   </section>
 
   <!-- ============ SETUP ============ -->
   <section class="wrap block bordered" id="setup">
-    <h2>Your setup</h2>
-    <p class="lede">This is what the times above are built from. Change it once and it sticks.</p>
+    <h2>Setup for <span id="setupWho">this athlete</span></h2>
+    <p class="lede">This is what the times and portions above are built from. Change it once and it sticks.</p>
 
     <div class="fields">
       <label>Name
@@ -149,20 +165,31 @@
       <label>Events
         <input id="events" type="text" maxlength="40" placeholder="100 / 200 / 400" />
       </label>
+      <label>Type of runner
+        <select id="discipline">
+          <option value="sprint">Sprints, 60 to 400</option>
+          <option value="middle">Middle distance, 800 and up</option>
+        </select>
+      </label>
       <label>Practice starts
         <input id="practiceStart" type="time" value="15:30" />
       </label>
       <label>Practice runs about
         <select id="practiceLength">
           <option value="60">1 hour</option>
-          <option value="90" selected>1.5 hours</option>
+          <option value="90">1.5 hours</option>
           <option value="120">2 hours</option>
           <option value="150">2.5 hours</option>
         </select>
       </label>
     </div>
 
-    <button id="saveProfileBtn" class="solid" type="button">Save setup</button>
+    <label class="check standalone"><input id="trackCycle" type="checkbox" /><span>Include the question about periods in the check-in</span></label>
+
+    <div class="setup-actions">
+      <button id="saveProfileBtn" class="solid" type="button">Save setup</button>
+      <button id="removeAthlete" class="ghost small" type="button">Remove this athlete</button>
+    </div>
     <span id="saveStatus" class="save-status" role="status"></span>
   </section>
 
@@ -172,35 +199,43 @@
     <div class="why">
       <div>
         <h3>Match the food to the work</h3>
-        <p>How much you eat, and when, should track what you're actually doing that day. A hard sprint session and a rest day are not the same job.</p>
+        <p>How much you eat, and when, should track what you're actually doing that day. A rest day and a hard session are not the same job, and a 6&nbsp;×&nbsp;400 workout is not the same job as block starts.</p>
       </div>
       <div>
         <h3>Don't leave long gaps</h3>
-        <p>Youth athlete guidance keeps coming back to eating regularly. A seven-hour gap between lunch and dinner is why practice feels awful.</p>
+        <p>Youth athlete guidance suggests eating roughly every three hours, so that a long school day doesn't quietly build an energy deficit inside a single day.</p>
       </div>
       <div>
         <h3>Under-fueling costs you</h3>
-        <p>Eating too little over time hurts recovery, bone health, hormones, and speed. It is not a shortcut to being faster.</p>
+        <p>Eating too little over time hurts recovery, bone health, hormones, immune function and speed. It is not a shortcut to getting faster.</p>
+      </div>
+      <div>
+        <h3>Hands, not numbers</h3>
+        <p>Portions are given in hand sizes because hands grow as the athlete does. Nothing here needs weighing, counting or logging.</p>
       </div>
       <div>
         <h3>Food before supplements</h3>
-        <p>Real food does the job. Supplements are optional, unregulated, and can carry banned substances that cost athletes eligibility.</p>
+        <p>Real food does the job. Supplements are unregulated, and athletes have lost eligibility over banned substances that were never printed on the label.</p>
+      </div>
+      <div>
+        <h3>Floors, not targets</h3>
+        <p>Every portion here is a minimum. Growth costs energy on top of training, and teenagers burn more per pound of body weight than adults do.</p>
       </div>
     </div>
 
     <h3 class="sources-head">Sources</h3>
     <ul class="sources">
-      <li><a href="https://www.ncaa.org/sports/2013/11/25/nutrition-hydration-and-performance.aspx" target="_blank" rel="noopener">NCAA Sport Science Institute — nutrition, hydration and performance</a></li>
-      <li><a href="https://www.acsm.org/docs/default-source/nyshsi_resources/resources/nyshsi-optimal-nutrition-for-youth-athletes.pdf" target="_blank" rel="noopener">ACSM / NYSHSI — Optimal nutrition for youth athletes</a></li>
-      <li><a href="https://acsm.org/science-spotlight-new-consensus-statement-highlights-care-for-adolescent-athletes/" target="_blank" rel="noopener">ACSM — adolescent athlete consensus statement</a></li>
-      <li><a href="https://bjsm.bmj.com/content/57/17/1073" target="_blank" rel="noopener">IOC consensus statement on Relative Energy Deficiency in Sport</a></li>
-      <li><a href="https://www.ncaa.org/sports/2015/6/10/ncaa-banned-substances.aspx" target="_blank" rel="noopener">NCAA — banned substances and supplement warning</a></li>
+      <li><a href="https://www.acsm.org/docs/default-source/nyshsi_resources/resources/nyshsi-optimal-nutrition-for-youth-athletes.pdf" target="_blank" rel="noopener">ACSM / NYSHSI — Optimal nutrition for youth athletes: food sources and fuel timing</a></li>
+      <li><a href="https://acsm.org/science-spotlight-new-consensus-statement-highlights-care-for-adolescent-athletes/" target="_blank" rel="noopener">ACSM — The Adolescent Athlete and the Team Physician, 2026 consensus statement</a></li>
+      <li><a href="https://stillmed.olympics.com/media/Documents/Athletes/Medical-Scientific/Consensus-Statements/REDs/BJSM-IOC-consensus-statement-on-Relative-Energy-Deficiency-in-Sport-REDs.pdf" target="_blank" rel="noopener">IOC 2023 consensus statement on Relative Energy Deficiency in Sport, free full text</a></li>
+      <li><a href="https://www.ncaa.org/sports/2024/4/23/training-and-performance.aspx" target="_blank" rel="noopener">NCAA Sport Science Institute — training and performance</a></li>
+      <li><a href="https://www.ncaa.org/what-we-do/health-safety-and-performance/anti-doping-and-substance-misuse-prevention/banned-substances/" target="_blank" rel="noopener">NCAA — banned substances and supplement warning</a></li>
     </ul>
   </section>
 
   <section class="wrap block">
     <div class="disclaimer">
-      <p><b>This is a planning tool, not a doctor.</b> It can't diagnose anything. If you're dealing with ongoing tiredness, repeat injuries, dizziness, times that keep sliding, weight changing without you meaning it to, or periods that have gotten irregular or stopped, tell a parent, your coach, or a doctor. Those are worth a real conversation.</p>
+      <p><b>This is a planning tool, not a doctor.</b> It can't diagnose anything. If you're dealing with ongoing tiredness, repeat injuries or illness, dizziness, times that keep sliding, weight changing without you meaning it to, or periods that have gotten irregular or stopped, tell a parent, your coach, or a doctor. Those are worth a real conversation.</p>
       <p>If food or eating has started to feel stressful, controlling, or hard to talk about, that's also worth telling someone. In the US the National Alliance for Eating Disorders helpline is 1-866-662-1235.</p>
     </div>
   </section>

@@ -1,18 +1,20 @@
-# Fuel — sprint day eating
+# Fuel — track day eating
 
-A small static web app that tells a high school sprinter what to eat and when, built around the time practice actually starts. No build step, no dependencies, no backend, no accounts. Drop it on GitHub Pages and it works.
+A small static web app that tells a high school runner what to eat and when, built around the time practice actually starts. Handles more than one athlete, with separate content for sprinters and middle distance runners. No build step, no dependencies, no backend, no accounts. Drop it on GitHub Pages and it works.
 
-Written to be read by the athlete, not about her.
+Written to be read by the athlete, not about them.
 
 ## What it does
 
-- Six training modes: hard sprints, normal practice, lift + track, easy/drills, rest, meet
-- A schedule with **real clock times** worked out from your practice start and length
+- **Two or more athletes**, switched from the bar at the top, each with their own setup
+- **Two disciplines.** Sprint mode has hard sprints, normal practice, lift + track, easy/drills, rest and meet. Middle distance mode has interval session, tempo, long run, easy miles, lift + run, rest and meet — with its own week template, its own meals and its own meet-day guide
+- A schedule with **real clock times** worked out from that athlete's practice start and length
 - Highlights whichever meal or snack is up next right now
-- Meet mode rebuilds the schedule around your first race time
+- Meet mode rebuilds the schedule around the first race time
+- **Portions in hand sizes**, changing by training day, framed as floors rather than targets
 - A one-week meal template you can swap items in and out of
-- A tappable shopping list that remembers what you've crossed off
-- A fueling check-in that flags when under-fueling might be the problem
+- A tappable shopping list, shared across athletes
+- A fueling check-in covering energy, hunger, soreness, sleep, illness, bone pain, strength and performance
 - Print view for sticking on the fridge
 - Sources for every principle the app is built on
 
@@ -32,43 +34,63 @@ GitHub gives you the public URL a minute or two later. On a phone, use "Add to H
 
 ## Setting it up
 
-The Your setup section at the bottom takes four things:
+The app ships with two blank athletes, one sprint and one middle distance. Name them in the Setup section at the bottom, then switch between them with the bar at the top. **Add** creates another; **Remove this athlete** deletes the current one.
 
 | Field | Used for |
 |---|---|
-| Name | The line in the header |
+| Name | The switcher tab and the Setup heading |
 | Events | The line in the header |
-| Practice starts | Anchors the pre-practice snack (90 min before) |
-| Practice runs about | Anchors recovery and dinner (after practice ends) |
+| Type of runner | Swaps the whole day set, week template, meals, portions and meet guide |
+| Practice starts | Anchors the pre-training snack, 90 min before |
+| Practice runs about | Anchors recovery and dinner, from when practice ends |
+| Include the period question | Shows or hides that one check-in question |
 
 Meet mode adds a first-race time and rebuilds around that instead.
 
 Breakfast, mid-morning and lunch are shown as words rather than clock times, because school schedules vary too much for a made-up number to be useful.
 
+No names are hardcoded anywhere in the source. Since a GitHub Pages repo is public, the athletes' names live only in each browser's local storage, never in the committed files.
+
+## Portions
+
+Portions are given in hand sizes — cupped hand, palm, fist, thumb — and change with the training day. Hands scale with the athlete, so the same instruction gives a 15-year-old and an 18-year-old different amounts without either of them counting anything.
+
+Every portion is written as a **minimum**. The app never suggests eating less, and the check-in's worst-case output points at a doctor rather than at a smaller plate.
+
 ## Notes on what changed and why
 
 - **No weight or height field.** The old version collected both and never used either for anything. A weight box in a food app aimed at a teenage athlete is a downside with no upside, so it's gone.
-- **No calorie or macro numbers anywhere.** Deliberate. The whole app is built around eating enough, not tracking.
+- **No calorie, gram or macro numbers anywhere.** Portions are hand sizes only. The whole app is built around eating enough, not tracking.
 - **The check-in never tells anyone to eat less.** Its worst-case output points at a doctor or a sports dietitian.
+- **Middle distance is not sprint content with the labels changed.** Different day types, different meals, different weekly template, higher carbohydrate portions, different meet-day structure for a prelim and final.
 
 ## Editing the content
 
 All the food is plain data at the top of `app.js`:
 
-- `plans` — the six training modes and their meals
-- `ANCHORS` — when each slot happens (fixed word, or an offset from practice start / practice end / first race)
-- `weekly` — the seven-day table
+- `SPRINT_DAYS` / `MIDDLE_DAYS` — the training modes, their copy, meals and portions
+- `SPRINT_WEEK` / `MIDDLE_WEEK` — the seven-day tables
+- `SPRINT_MEET` / `MIDDLE_MEET` — the meet-day guides
+- `ANCHORS` — when each slot happens (a fixed word, or an offset from practice start / practice end / first race)
 - `groceries` — the shopping list
+
+To add a third discipline, add a day array, a week array and a meet array, then register them in `DISCIPLINES` and add an `<option>` to the `discipline` select in `index.html`.
 
 Change the strings, refresh, done.
 
 ## Evidence base
 
-- NCAA Sport Science Institute — nutrition, hydration and performance
-- ACSM / NYSHSI — Optimal nutrition for youth athletes
-- ACSM — adolescent athlete consensus statement
-- IOC consensus statement on Relative Energy Deficiency in Sport (RED-S)
-- NCAA supplement and banned-substance guidance
+- ACSM / NYSHSI — Optimal nutrition for youth athletes: food sources and fuel timing
+- ACSM — The Adolescent Athlete and the Team Physician, 2026 consensus statement
+- IOC 2023 consensus statement on Relative Energy Deficiency in Sport
+- NCAA Sport Science Institute — training and performance
+- NCAA banned substances and supplement warning
+
+Two things worth knowing about the evidence. First, the REDs framework is the standard reference but is not uncontested — a 2024 review argues the empirical basis for REDs as a discrete syndrome is limited and that its symptoms are multifactorial. That does not change the underlying advice to avoid under-fueling, but it is why the check-in prompts a conversation with a doctor rather than presenting itself as a screening tool.
+
+Second, the app recommends easily digested carbohydrate such as pretzels and applesauce 60–90 minutes before training, whereas the NYSHSI paper advises favouring lower-glycaemic foods pre-exercise. At that distance from the session digestibility matters more, but the divergence is deliberate rather than accidental.
+
+**Not covered:** iron, calcium and vitamin D. These are where adolescent athletes most often actually run short, particularly menstruating athletes and anyone running real mileage. Worth adding.
 
 This is an educational planning tool. It does not diagnose or treat anything.
 
@@ -79,7 +101,7 @@ Everything typed in stays in the browser's local storage on that one device. The
 ## Files
 
 ```text
-fuel/
+meal-prep/
 ├── index.html
 ├── styles.css
 ├── app.js
