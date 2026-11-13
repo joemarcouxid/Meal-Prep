@@ -1119,3 +1119,155 @@ details.more > summary {
 
 .slider > span { justify-content: flex-start; }
 .slider > span b { margin-left: auto; margin-right: 1px; }
+
+/* =========================================================
+   v6: seasons, food swaps, stuck somewhere, family
+   ========================================================= */
+
+.familybtn {
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 34px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px dashed rgba(255, 255, 255, 0.6);
+  background: transparent;
+  color: #fff;
+  flex: none;
+}
+
+.familybtn.on { background: var(--ink); border: 1px solid var(--ink); }
+
+.nc-swap {
+  display: block;
+  margin-top: 14px;
+  font: inherit;
+  font-size: 0.85rem;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  opacity: 0.7;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.stuck {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  margin-top: 22px;
+  padding: 14px 16px;
+  background: var(--lane);
+  border: 1px solid var(--line-hard);
+  border-left: 3px solid var(--track);
+  border-radius: 4px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.stuck b { display: block; font-weight: 600; }
+.stuck span { color: var(--ink-soft); font-size: 0.9rem; }
+.stuck:hover { border-color: var(--ink-soft); }
+
+.season-field { grid-template-columns: 1fr; max-width: 520px; margin-bottom: 4px; }
+.season-field .footnote { margin: 0; }
+
+.foodlist button[aria-pressed="true"] {
+  background: transparent;
+  border-color: var(--line-hard);
+  color: var(--ink-soft);
+  text-decoration: line-through;
+}
+
+.foodlist button[aria-pressed="true"]::before { content: "✕ "; text-decoration: none; display: inline-block; }
+
+#foodsWho:empty { display: none; }
+
+/* stuck somewhere */
+
+.grab-body {
+  margin-top: 8px;
+  padding: 20px 20px 18px;
+  background: var(--lane);
+  border-top: 3px solid var(--track);
+}
+
+.grab-body h2 { margin-bottom: 8px; }
+
+.grab-list { margin: 0; padding: 0; list-style: none; }
+
+.grab-list li {
+  padding: 11px 0 11px 22px;
+  border-bottom: 1px solid var(--line);
+  position: relative;
+}
+
+.grab-list li::before {
+  content: "";
+  position: absolute;
+  left: 2px; top: 20px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--track);
+}
+
+.grab-tip {
+  margin: 14px 0 0;
+  font-size: 0.94rem;
+  color: var(--ink-soft);
+}
+
+/* family */
+
+.fam-h { font-size: 1.4rem; margin-top: 18px; }
+
+.fam-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.fam-card {
+  background: var(--lane);
+  padding: 14px 16px 6px;
+  border-top: 3px solid var(--ink);
+}
+
+.fam-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+  margin-bottom: 4px;
+}
+
+.fam-head b {
+  font-family: var(--condensed);
+  font-stretch: condensed;
+  font-size: 1.35rem;
+}
+
+.fam-head span { color: var(--ink-soft); font-size: 0.9rem; }
+
+.fam-card ul { list-style: none; margin: 0; padding: 0; }
+.fam-card li { padding: 8px 0; border-top: 1px solid var(--line); font-size: 0.95rem; }
+
+table.fam-week { min-width: 640px; }
+.fam-week td { font-size: 0.85rem; color: var(--ink); }
+.fam-week td.k-rest { color: var(--ink-soft); }
+.fam-week td.k-meet { color: var(--track-deep); font-weight: 600; }
+.fam-week td.k-hard, .fam-week td.k-workout { font-weight: 600; }
+
+.qty { font-weight: 700; color: var(--track-deep); margin-left: 2px; }
+
+@media (max-width: 620px) {
+  .topbar .athletes button { padding: 4px 11px; }
+  .familybtn { padding: 4px 10px; }
+}
+
+#foods { scroll-margin-top: 64px; }

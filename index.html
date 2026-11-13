@@ -21,6 +21,7 @@
   <div class="wrap topbar-inner">
     <span class="mark">Fuel</span>
     <div class="athletes" id="athleteTabs" role="group" aria-label="Choose athlete"></div>
+    <button type="button" class="familybtn" id="familyBtn">Family</button>
   </div>
 </header>
 
@@ -32,7 +33,7 @@
       <p class="dayline" id="nowDayline"></p>
 
       <div class="nudge" id="setupNudge" hidden>
-        <p><b>Set your week once.</b> Tell the app which days are hard, easy, lift or rest, and it'll pick today for you from then on.</p>
+        <p><b>One minute of setup.</b> Check your week is right, and tap any foods you won't eat. After that the app picks today's plan on its own.</p>
         <button class="solid small" type="button" data-go="week">Set my week</button>
       </div>
 
@@ -41,6 +42,11 @@
       <div class="after" id="nowAfter"></div>
 
       <div class="bag" id="nowBag"></div>
+
+      <button class="stuck" type="button" data-go="grab">
+        <b>Plan fell through?</b>
+        <span>Best pick at the gas station, cafeteria, fast food, vending machine or an empty fridge</span>
+      </button>
 
       <div class="quick">
         <button class="ghost small" type="button" data-go="today">Today's full plan</button>
@@ -134,6 +140,17 @@
       <h1>Your week</h1>
       <p class="lede">Set this once. The app uses it to pick today's plan automatically. You can still change any single day from the Now screen.</p>
 
+      <div class="fields fields-tight season-field">
+        <label>Season
+          <select id="season">
+            <option value="off">Off-season</option>
+            <option value="in">Track season</option>
+            <option value="summer">Summer / no school</option>
+          </select>
+        </label>
+        <p class="footnote" id="seasonNote"></p>
+      </div>
+
       <div class="weekset" id="weekSet"></div>
 
       <div class="fields fields-tight">
@@ -205,6 +222,13 @@
       <button class="solid" type="button" id="installBtn" hidden>Install</button>
     </div>
 
+    <div class="wrap block bordered" id="foods">
+      <h2>Foods <span id="foodsWho"></span> won't eat</h2>
+      <p class="lede">Tap anything you don't like or can't have. Every suggestion in the app swaps it for something else. Tap again to undo.</p>
+      <div class="ticklist foodlist" id="foodList"></div>
+      <p class="footnote" id="foodsCount"></p>
+    </div>
+
     <div class="wrap block bordered">
       <h2>Is your fueling keeping up?</h2>
       <p class="lede">Nothing here is saved or sent anywhere. It just tells you what your body might be asking for.</p>
@@ -231,9 +255,8 @@
 
     <div class="wrap block bordered">
       <h2>Shopping list</h2>
-      <p class="lede">Tap to cross things off. Shared by everyone on this device.</p>
-      <div id="groceryList" class="groceries"></div>
-      <button id="resetGroceries" class="ghost small" type="button">Clear list</button>
+      <p class="lede">The shopping list now builds itself from everyone's week, with counts for the snacks.</p>
+      <button class="ghost small" type="button" data-go="family">Open the family view</button>
     </div>
 
     <div class="wrap block bordered" id="setup">
@@ -308,6 +331,39 @@
         <p>If food or eating has started to feel stressful, controlling, or hard to talk about, that's also worth telling someone. In the US the National Alliance for Eating Disorders helpline is 1-866-662-1235.</p>
       </div>
       <p class="foot">Fuel · Food first. No calorie counting. Nothing to earn.</p>
+    </div>
+  </section>
+
+  <!-- ================= STUCK SOMEWHERE ================= -->
+  <section class="view" id="view-grab" data-view="grab" hidden>
+    <div class="wrap block">
+      <h1>Plan fell through?</h1>
+      <p class="lede">Wherever you are, there's a decent option. Pick where you are.</p>
+      <div class="chips" id="grabChips" role="group" aria-label="Where are you"></div>
+      <div id="grabBody" class="grab-body"></div>
+      <p class="footnote">Something is always better than nothing before practice. Carbs first, protein after.</p>
+    </div>
+  </section>
+
+  <!-- ================= FAMILY ================= -->
+  <section class="view" id="view-family" data-view="family" hidden>
+    <div class="wrap block">
+      <h1>Family</h1>
+      <p class="lede">Everyone at once. Built from each athlete's week on this device.</p>
+      <h2 class="fam-h">Tomorrow's bags</h2>
+      <div class="fam-cards" id="familyTomorrow"></div>
+    </div>
+
+    <div class="wrap block bordered">
+      <h2>Next 7 days</h2>
+      <div class="scroller" id="familyWeek"></div>
+    </div>
+
+    <div class="wrap block bordered">
+      <h2>Shopping list</h2>
+      <p class="lede">Built from the next 7 days for everyone, with each person's food swaps applied. Numbers are roughly how many of each the snacks use. Tap to cross off.</p>
+      <div id="familyShop" class="groceries"></div>
+      <button id="resetGroceries" class="ghost small" type="button">Clear ticks</button>
     </div>
   </section>
 

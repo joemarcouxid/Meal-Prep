@@ -1,6 +1,6 @@
 /* Fuel service worker: keeps the app working with no signal (meets, buses, gyms).
    Bump VERSION whenever any app file changes so phones pick up the new copy. */
-const VERSION = "fuel-v5.0";
+const VERSION = "fuel-v6.0";
 const FILES = [
   "./",
   "index.html",

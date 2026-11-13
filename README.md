@@ -11,6 +11,10 @@ Written to be read by the athlete, not about them.
 - **Phone reminders.** The Week tab builds a calendar file with repeating alarms on practice days: mid-morning snack, before practice, right after, and "pack tomorrow's bag". No server needed.
 - **Installs to the home screen and works offline**, so it opens at meets with no signal.
 - Five tabs: Now, Today (full timeline + hand-size portions), Meet (race-time plan + tickable meet bag), Week (schedule, reminders, menu ideas), More (check-in, shopping list, setup, sources).
+- **Seasons.** Off-season, track season and summer, each with its own starting week. A new athlete gets the season that matches the month. Summer drops the school-day wording.
+- **Foods you won't eat.** Each athlete taps foods they skip. Every suggestion, bag, meet guide and calendar reminder swaps them out automatically.
+- **"Plan fell through?"** Best picks at the cafeteria, gas station, fast food, vending machine, an empty fridge, meet concessions or a coffee shop.
+- **Family view** (button in the top bar). Tomorrow's bag for each kid, a 7-day grid for everyone, and a shopping list built from the next 7 days with counts for snacks.
 - Two disciplines (sprint, middle distance) with separate day types, meals, bags and meet guides. Any number of athletes.
 - Print view prints today's plan for the fridge.
 
@@ -69,9 +73,11 @@ All the food is plain data at the top of `app.js`:
 - `SPRINT_WEEK` / `MIDDLE_WEEK` — the seven-day tables
 - `SPRINT_MEET` / `MIDDLE_MEET` — the meet-day guides
 - `SPRINT_BAG` / `MIDDLE_BAG` / `MEET_BAG` — what goes in the bag for each day type
-- `DEFAULT_WEEK` — the starting schedule for a new athlete
+- `SEASON_WEEK` / `SEASONS` — the starting schedule for each season
+- `FOODS` — foods an athlete can swap out, and what replaces them (in order of preference)
+- `GRAB` — the "Plan fell through?" places
+- `COUNTED` / `STAPLES` / `ALWAYS` — how the family shopping list is built
 - `ANCHORS` — when each slot happens (a fixed word, or an offset from practice start / practice end / first race)
-- `groceries` — the shopping list
 
 To add a third discipline, add a day array, a week array and a meet array, then register them in `DISCIPLINES` and add an `<option>` to the `discipline` select in `index.html`.
 

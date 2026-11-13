@@ -12,6 +12,7 @@
   const KEY_ATHLETES = "fuelAthletesV5";
   const KEY_CART = "fuelCartV3";
   const KEY_MEETBAG = "fuelMeetBagV1";
+  const KEY_GRAB = "fuelGrabPlaceV1";
 
   /* ---------- tiny helpers ---------- */
 
@@ -323,14 +324,152 @@
     middle: { label: "Middle distance", days: MIDDLE_DAYS, week: MIDDLE_WEEK, meet: MIDDLE_MEET, events: "800 / 1600" }
   };
 
-  /* ---------- shopping ---------- */
+  /* ---------- seasons ---------- */
+  // The week an athlete starts from depends on the time of year.
 
-  const groceries = {
-    "Protein": ["Eggs", "Chicken", "Greek yogurt", "Milk", "Chocolate milk", "Turkey", "Ground beef", "Cheese"],
-    "Carbs": ["Rice", "Mac and cheese", "Pasta", "Bagels", "Bread", "Tortillas", "Cereal", "Oatmeal", "Granola"],
-    "Grab and go": ["Bananas", "Applesauce pouches", "Granola bars", "Pretzels", "Grapes or berries", "Crackers", "Peanut butter"],
-    "Meets and hot days": ["Sports drink", "Extra water bottle", "Easy snacks that travel"]
+  const SEASONS = {
+    off:    { label: "Off-season",           note: "Lifting and base work. Still training, still eating like it." },
+    in:     { label: "Track season",         note: "Practices and meets. Hard days get the most food." },
+    summer: { label: "Summer / no school",   note: "No school day to work around. Practice may be in the morning." }
   };
+
+  const SEASON_WEEK = {
+    off: {
+      sprint: ["rest", "lift", "easy", "lift", "normal", "lift", "rest"],
+      middle: ["rest", "easy", "lift", "tempo", "easy", "lift", "long"]
+    },
+    in: {
+      sprint: ["rest", "hard", "lift", "normal", "hard", "easy", "meet"],
+      middle: ["rest", "workout", "easy", "lift", "tempo", "easy", "meet"]
+    },
+    summer: {
+      sprint: ["rest", "lift", "normal", "lift", "hard", "easy", "rest"],
+      middle: ["rest", "workout", "easy", "lift", "tempo", "easy", "long"]
+    }
+  };
+
+  // Washington high school track runs roughly March to May.
+  const seasonForDate = (d = new Date()) => {
+    const m = d.getMonth() + 1;
+    if (m >= 3 && m <= 5) return "in";
+    if (m >= 6 && m <= 8) return "summer";
+    return "off";
+  };
+
+  /* ---------- food swaps ---------- */
+  // Tap a food you won't eat and every suggestion in the app swaps it out.
+  // Each swap lists the foods it relies on, so it is skipped if those are out too.
+  // Order matters: longer phrases first (chocolate milk before milk).
+
+  const FOODS = [
+    { id: "chocmilk", label: "Chocolate milk", re: /\b(?:a |an )?(?:shelf-stable )?chocolate milk\b/gi,
+      swap: [["a smoothie", []], ["milk and a granola bar", ["milk", "granolabar"]], ["a fruit pouch and crackers", []]] },
+    { id: "mac", label: "Mac and cheese", re: /\bmac(?:aroni)? (?:and|&) cheese\b/gi,
+      swap: [["pasta", ["pasta"]], ["rice", ["rice"]], ["potatoes", []]] },
+    { id: "pb", label: "Peanut butter", re: /\bpeanut butter\b/gi,
+      swap: [["sunflower butter", []]] },
+    { id: "granolabar", label: "Granola bars", re: /\b(?:a |an )?granola bars?\b/gi,
+      swap: [["a fig bar", []], ["crackers", []]] },
+    { id: "granola", label: "Granola", re: /\bgranola\b/gi,
+      swap: [["cereal", []]] },
+    { id: "milk", label: "Milk", re: /\bmilk\b/gi,
+      swap: [["soy or oat milk", []]] },
+    { id: "cheese", label: "Cheese", re: /\bcheese\b/gi,
+      swap: [["hummus", []], ["turkey", ["turkey"]]] },
+    { id: "yogurt", label: "Yogurt", re: /\b(?:a |an )?(?:greek )?yogurt\b/gi,
+      swap: [["cottage cheese", ["cheese"]], ["a smoothie", []]] },
+    { id: "eggs", label: "Eggs", re: /\b(?:two |2 )?eggs?\b/gi,
+      swap: [["turkey or ham", ["turkey"]], ["a smoothie", []]] },
+    { id: "banana", label: "Bananas", re: /\b(?:a |an )?bananas?\b/gi,
+      swap: [["an apple", []], ["grapes", []]] },
+    { id: "applesauce", label: "Applesauce", re: /\bapplesauce(?: pouch(?:es)?)?\b/gi,
+      swap: [["a fruit pouch", []], ["dried fruit", []]] },
+    { id: "pretzels", label: "Pretzels", re: /\bpretzels?\b/gi,
+      swap: [["crackers", []], ["rice cakes", []]] },
+    { id: "bagel", label: "Bagels", re: /\b(?:a |an )?bagels?\b/gi,
+      swap: [["toast", []], ["an English muffin", []]] },
+    { id: "oatmeal", label: "Oatmeal", re: /\boatmeal\b/gi,
+      swap: [["cereal", []], ["toast", []]] },
+    { id: "chicken", label: "Chicken", re: /\bchicken\b/gi,
+      swap: [["turkey", ["turkey"]], ["beef", ["beef"]], ["beans", ["beans"]]] },
+    { id: "turkey", label: "Turkey", re: /\bturkey\b/gi,
+      swap: [["chicken", ["chicken"]], ["ham", []]] },
+    { id: "beef", label: "Beef / burgers", re: /\b(?:ground )?beef\b|\bburgers?\b|\bmeat sauce\b/gi,
+      swap: [["chicken", ["chicken"]], ["turkey", ["turkey"]]] },
+    { id: "rice", label: "Rice", re: /\brice\b/gi,
+      swap: [["pasta", ["pasta"]], ["potatoes", []]] },
+    { id: "pasta", label: "Pasta", re: /\b(?:pasta|spaghetti)\b/gi,
+      swap: [["rice", ["rice"]], ["potatoes", []]] },
+    { id: "beans", label: "Beans", re: /\bbeans\b/gi,
+      swap: [["extra rice", ["rice"]], ["potatoes", []]] }
+  ];
+
+  const capFirst = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+  // Rewrites a suggestion so it only uses foods this athlete eats.
+  function personal(text, a) {
+    const out = a && a.dislikes;
+    if (!text || !out || !out.length) return text;
+    const no = new Set(out);
+    const made = [];
+    let s = String(text);
+    FOODS.forEach((f) => {
+      if (!no.has(f.id)) return;
+      const pick = f.swap.find(([, needs]) => needs.every((n) => !no.has(n))) || f.swap[f.swap.length - 1];
+      s = s.replace(f.re, (m, offset) => {
+        made.push(offset === 0 || /^[A-Z]/.test(m) ? capFirst(pick[0]) : pick[0]);
+        return `\u0000${made.length - 1}\u0000`;
+      });
+    });
+    return s.replace(/\u0000(\d+)\u0000/g, (_, i) => made[Number(i)]);
+  }
+
+  /* ---------- stuck somewhere ---------- */
+
+  const GRAB = [
+    { id: "cafeteria", label: "School cafeteria",
+      items: ["The full hot lunch, and take the carb side: rice, roll, potatoes or pasta", "An extra milk or chocolate milk", "Extra fruit to save for before practice"],
+      tip: "Lunch is usually the last real meal before a long practice. Don't skip the carb to save room." },
+    { id: "gas", label: "Gas station",
+      items: ["Before practice: a banana, pretzels, a granola bar or fig bars", "After: chocolate milk and a turkey sandwich or wrap from the cooler", "String cheese, trail mix or a bagel to round it out", "A sports drink if it's hot"],
+      tip: "Energy drinks aren't fuel. They're caffeine with no food in them, and most aren't meant for teenagers." },
+    { id: "fast", label: "Fast food",
+      items: ["Burrito bowl: rice, chicken, beans, salsa", "Sub shop: a turkey or chicken sub", "Burger place: a burger or grilled chicken sandwich. Fries are fine after training", "Breakfast menu: egg sandwich, pancakes or oatmeal"],
+      tip: "Within an hour or two of running, go lighter and less greasy. After training, almost anything with carbs and protein works." },
+    { id: "vending", label: "Vending machine",
+      items: ["Pretzels or crackers", "Peanut butter crackers", "A granola bar or fig bars", "Sports drink or juice", "Trail mix"],
+      tip: "Candy alone is better than nothing before practice, but pair it with pretzels or crackers." },
+    { id: "home", label: "Nothing at home",
+      items: ["Toast or a bagel with peanut butter, and a banana", "Cereal and milk", "Eggs and toast", "Quesadilla with cheese and whatever meat is around", "Instant oatmeal, or ramen with an egg cracked in", "PB&J and a glass of milk"],
+      tip: "No recipe needed. A carb plus a protein, five minutes, done." },
+    { id: "meetfood", label: "Meet concessions",
+      items: ["Between races: a bagel, banana, pretzels or a plain sandwich", "Sports drink or water", "Save hot dogs, nachos and pizza for after your last race"],
+      tip: "Nothing new on race day. If nothing looks familiar, plain carbs are the safe pick." },
+    { id: "coffee", label: "Coffee shop",
+      items: ["A bagel or oatmeal", "Egg bites or a breakfast sandwich", "A banana and a milk or chocolate milk", "Hot chocolate on a cold day counts as a recovery drink"],
+      tip: "Skip the big caffeinated drinks before practice. They don't replace food." }
+  ];
+
+  /* ---------- family shopping list ---------- */
+  // Grab-and-go items are counted from the next 7 days of everyone's plan.
+
+  const COUNTED = [
+    ["Bananas", /banana/i], ["Apples", /\bapple\b/i], ["Pretzels (snack bags)", /pretzel/i],
+    ["Granola bars", /granola bar/i], ["Fig bars", /fig bar/i], ["Applesauce or fruit pouches", /applesauce|fruit pouch/i],
+    ["Chocolate milk (single boxes)", /chocolate milk/i], ["Yogurt cups", /yogurt/i], ["Bagels", /bagel/i],
+    ["Crackers", /cracker/i], ["Rice cakes", /rice cake/i], ["Sports drink", /sports drink/i], ["Smoothies", /smoothie/i]
+  ];
+
+  const STAPLES = [
+    ["Eggs", /\beggs?\b/i], ["Milk", /(?<!chocolate )\bmilk\b/i], ["Bread", /\btoast\b|\bbread\b|sandwich/i],
+    ["Rice", /\brice\b(?! cake)/i], ["Pasta", /pasta|spaghetti/i], ["Mac and cheese", /mac and cheese/i],
+    ["Chicken", /chicken/i], ["Turkey", /turkey/i], ["Ground beef", /beef|burger|meat sauce/i],
+    ["Tortillas", /taco|quesadilla|tortilla|burrito/i], ["Cereal", /cereal/i], ["Oatmeal", /oatmeal/i],
+    ["Potatoes", /potato/i], ["Cheese", /(?<!mac and )\bcheese\b(?! stick)/i], ["Peanut butter", /peanut butter/i],
+    ["Jam", /\bjam\b/i], ["Granola", /granola(?! bar)/i], ["Beans", /\bbeans\b/i]
+  ];
+
+  const ALWAYS = ["Fruit for the week", "Vegetables everyone will actually eat", "Water bottles"];
 
   /* ---------- what goes in the bag ---------- */
   // The athlete doesn't control dinner. They do control what's in the backpack.
@@ -358,12 +497,6 @@
     "Only foods you've eaten before a practice"
   ];
 
-  // Index 0 is Sunday, to match Date.getDay().
-  const DEFAULT_WEEK = {
-    sprint: ["rest", "hard", "lift", "normal", "hard", "easy", "meet"],
-    middle: ["rest", "workout", "easy", "lift", "tempo", "easy", "long"]
-  };
-
   // Day types that mean an afternoon practice, for reminders.
   const NO_PRACTICE = new Set(["rest", "meet", "long"]);
 
@@ -382,7 +515,9 @@
     practiceLength: 90,
     raceTime: "10:00",
     trackCycle: true,
-    week: DEFAULT_WEEK[discipline].slice(),
+    season: seasonForDate(),
+    week: SEASON_WEEK[seasonForDate()][discipline].slice(),
+    dislikes: [],
     override: null,
     scheduleSet: false,
     remind: { snack: false, pre: true, post: true, pack: false }
@@ -394,9 +529,12 @@
     const keys = new Set(DISCIPLINES[disc].days.map((d) => d.key));
     const base = newAthlete(disc);
     const out = { ...base, ...a, discipline: disc };
-    if (!Array.isArray(out.week) || out.week.length !== 7 || !out.week.every((k) => keys.has(k))) {
-      out.week = DEFAULT_WEEK[disc].slice();
+    if (!SEASONS[out.season]) out.season = seasonForDate();
+    if (!out.scheduleSet || !Array.isArray(out.week) || out.week.length !== 7 || !out.week.every((k) => keys.has(k))) {
+      out.week = SEASON_WEEK[out.season][disc].slice();
     }
+    if (!Array.isArray(out.dislikes)) out.dislikes = [];
+    out.dislikes = out.dislikes.filter((id) => FOODS.some((f) => f.id === id));
     if (out.override && !keys.has(out.override.day)) out.override = null;
     out.remind = { ...base.remind, ...(a.remind || {}) };
     delete out.day;
@@ -446,10 +584,14 @@
 
   const dayByKey = (a, key) => disc(a).days.find((x) => x.key === key) || disc(a).days[0];
 
+  const schoolless = (a, text) => a.season === "summer"
+    ? text.replace(/between classes/g, "mid-morning").replace(/for the day/g, "for the day")
+    : text;
+
   const bagFor = (a, key) => {
-    if (key === "meet") return MEET_BAG;
     const table = a.discipline === "middle" ? MIDDLE_BAG : SPRINT_BAG;
-    return table[key] || [];
+    const list = key === "meet" ? MEET_BAG : (table[key] || []);
+    return list.map((x) => personal(schoolless(a, x), a));
   };
 
   const nowMinutes = (d = new Date()) => d.getHours() * 60 + d.getMinutes();
@@ -469,7 +611,7 @@
   function resolveTime(a, anchorKey, date) {
     const anc = ANCHORS[anchorKey];
     if (!anc) return { word: "", sort: 9999 };
-    const weekend = date.getDay() === 0 || date.getDay() === 6;
+    const weekend = date.getDay() === 0 || date.getDay() === 6 || a.season === "summer";
 
     if (anc.word) {
       let word = anc.word;
@@ -493,9 +635,12 @@
   }
 
   function buildRows(a, day, date) {
-    return day.meals.map(([key, label, detail, tag]) => ({
-      key, label, detail, tag, t: resolveTime(a, key, date)
+    const rows = day.meals.map(([key, label, detail, tag]) => ({
+      key, label, detail: personal(detail, a), tag: personal(tag, a), t: resolveTime(a, key, date)
     }));
+    // Morning practices (summer, weekends) can land before breakfast, so order by time.
+    if (day.key !== "meet") rows.sort((x, y) => x.t.sort - y.t.sort);
+    return rows;
   }
 
   // Which row is "up next". A slot stays current for 20 minutes after its time.
@@ -542,7 +687,7 @@
     const changed = a.override && a.override.date === isoDate(date);
 
     $("nowDayline").innerHTML =
-      `${esc(WEEKDAYS[date.getDay()])} · <b>${esc(day.chip)}</b>${changed ? ' <span class="pill">changed for today</span>' : ""}`;
+      `${esc(WEEKDAYS[date.getDay()])} · ${esc(SEASONS[a.season].label)} · <b>${esc(day.chip)}</b>${changed ? ' <span class="pill">changed for today</span>' : ""}`;
     $("setupNudge").hidden = !!a.scheduleSet;
     $("nowChips").innerHTML = chipsHTML(a, key);
 
@@ -568,7 +713,8 @@
       <div class="nc-head">${when}${countdown}</div>
       <h2 class="nc-label">${esc(r.label)}</h2>
       <p class="nc-food">${esc(r.detail)}</p>
-      ${r.tag ? `<div class="tag">${esc(r.tag)}</div>` : ""}`;
+      ${r.tag ? `<div class="tag">${esc(r.tag)}</div>` : ""}
+      <button type="button" class="nc-swap" data-go="foods">Won't eat that? Swap it</button>`;
 
     const later = rows.slice(i + 1, i + 3);
     $("nowAfter").innerHTML = later.length ? `
@@ -597,8 +743,8 @@
     $("nowCard").innerHTML = `
       <div class="nc-eyebrow">${late ? "Tonight" : "Done with today's plan"}</div>
       <h2 class="nc-label">Still hungry? Eat.</h2>
-      <p class="nc-food">Cereal and milk, yogurt, or toast and peanut butter. Being hungry at night after training is normal, not something to push through.</p>
-      <div class="nc-tomorrow">Tomorrow is <b>${esc(tDay.chip)}</b>. First up: ${esc(first[2])}.</div>`;
+      <p class="nc-food">${esc(personal("Cereal and milk, yogurt, or toast and peanut butter.", a))} Being hungry at night after training is normal, not something to push through.</p>
+      <div class="nc-tomorrow">Tomorrow is <b>${esc(tDay.chip)}</b>. First up: ${esc(personal(first[2], a))}.</div>`;
 
     $("nowAfter").innerHTML = "";
 
@@ -637,6 +783,7 @@
       return `<div class="nc-head"><div class="nc-time">${esc(c.text)}<span>${esc(c.ampm)}</span></div><div class="nc-count">${esc(cd)}</div></div>`;
     })();
 
+    food = personal(food, a); tag = personal(tag, a);
     $("nowCard").className = "nowcard" + (eyebrow === "Now" ? " live" : "");
     $("nowCard").innerHTML = `
       <div class="nc-eyebrow">${esc(eyebrow)}</div>
@@ -647,7 +794,7 @@
 
     $("nowAfter").innerHTML = race !== null
       ? `<p class="footnote">Built from a first race at ${esc(fmt(race))}. <a href="#meet">Change it</a>.</p>` : "";
-    $("nowBag").innerHTML = race !== null && now < race ? `<h3>Meet bag</h3>${listHTML(MEET_BAG)}` : "";
+    $("nowBag").innerHTML = race !== null && now < race ? `<h3>Meet bag</h3>${listHTML(bagFor(a, "meet"))}` : "";
   }
 
   /* ---------- TODAY ---------- */
@@ -714,9 +861,9 @@
     $("raceTime2").value = a.raceTime;
     $("meetTodayBtn").textContent = dayKeyFor(a, new Date()) === "meet" ? "Today is a meet day ✓" : "Make today a meet day";
     $("meetGuide").innerHTML = disc(a).meet.map(([when, what]) => `
-      <li><b>${esc(when)}</b> ${esc(what)}</li>`).join("");
+      <li><b>${esc(when)}</b> ${esc(personal(what, a))}</li>`).join("");
     $("meetBag").innerHTML = MEET_BAG.map((item) => `
-      <button type="button" data-item="${esc(item)}" aria-pressed="${meetBag[item] ? "true" : "false"}">${esc(item)}</button>`).join("");
+      <button type="button" data-item="${esc(item)}" aria-pressed="${meetBag[item] ? "true" : "false"}">${esc(personal(item, a))}</button>`).join("");
   }
 
   /* ---------- WEEK ---------- */
@@ -742,8 +889,10 @@
     $("weeklyTable").innerHTML = disc(a).week.map((row) => `
       <tr>${row.map((cell, i) => i === 0
         ? `<th scope="row">${esc(cell)}</th>`
-        : `<td>${esc(cell)}</td>`).join("")}</tr>`).join("");
+        : `<td>${esc(personal(cell, a))}</td>`).join("")}</tr>`).join("");
 
+    $("season").value = a.season;
+    $("seasonNote").textContent = SEASONS[a.season].note;
     renderReminderOpts();
   }
 
@@ -798,7 +947,7 @@
     const days = practiceDays(a);
     const who = athleteLabel(a);
     const normal = dayByKey(a, a.discipline === "middle" ? "tempo" : "normal");
-    const find = (k) => (normal.meals.find((m) => m[0] === k) || [])[2] || "";
+    const find = (k) => personal((normal.meals.find((m) => m[0] === k) || [])[2] || "", a);
     const u = new Date();
     const dtstamp = `${u.getUTCFullYear()}${String(u.getUTCMonth() + 1).padStart(2, "0")}${String(u.getUTCDate()).padStart(2, "0")}T${String(u.getUTCHours()).padStart(2, "0")}${String(u.getUTCMinutes()).padStart(2, "0")}00Z`;
 
@@ -870,13 +1019,115 @@
 
   /* ---------- MORE ---------- */
 
-  function renderGroceries() {
-    $("groceryList").innerHTML = Object.entries(groceries).map(([group, items]) => `
+  function renderFoods() {
+    const a = activeAthlete();
+    const no = new Set(a.dislikes);
+    $("foodsWho").textContent = athleteLabel(a);
+    $("foodList").innerHTML = FOODS.map((f) => `
+      <button type="button" data-food="${esc(f.id)}" aria-pressed="${no.has(f.id)}">${esc(f.label)}</button>`).join("");
+    $("foodsCount").textContent = no.size
+      ? `${no.size} swapped out. Every suggestion in the app now uses something else.`
+      : "Nothing swapped out yet.";
+  }
+
+  /* ---------- STUCK SOMEWHERE ---------- */
+
+  let grabPlace = store.get(KEY_GRAB) || "gas";
+
+  function renderGrab() {
+    const a = activeAthlete();
+    if (!GRAB.some((g) => g.id === grabPlace)) grabPlace = GRAB[0].id;
+    const g = GRAB.find((x) => x.id === grabPlace);
+    $("grabChips").innerHTML = GRAB.map((x) => `
+      <button type="button" data-place="${esc(x.id)}" class="${x.id === grabPlace ? "on" : ""}" aria-pressed="${x.id === grabPlace}">${esc(x.label)}</button>`).join("");
+    $("grabBody").innerHTML = `
+      <h2>${esc(g.label)}</h2>
+      <ul class="grab-list">${g.items.map((x) => `<li>${esc(personal(x, a))}</li>`).join("")}</ul>
+      <p class="grab-tip">${esc(g.tip)}</p>`;
+  }
+
+  /* ---------- FAMILY ---------- */
+
+  // "Banana and pretzels, or applesauce and a granola bar" counts as the first option only.
+  const firstOption = (text) => String(text).split(/,? or /i)[0];
+
+  function weekDates(n = 7) {
+    const d = new Date();
+    return Array.from({ length: n }, (_, i) => addDays(d, i));
+  }
+
+  function buildShopping() {
+    const counts = new Map(COUNTED.map(([label]) => [label, 0]));
+    const staples = new Set();
+    const meetDays = [];
+
+    state.list.forEach((a) => {
+      weekDates().forEach((date) => {
+        const key = dayKeyFor(a, date);
+        const day = dayByKey(a, key);
+        day.meals.forEach(([slot, , detail]) => {
+          const text = personal(detail, a);
+          const first = firstOption(text);
+          if (["snack", "pre", "post", "raceSnack", "afterLast"].includes(slot)) {
+            COUNTED.forEach(([label, re]) => { if (re.test(first)) counts.set(label, counts.get(label) + 1); });
+          }
+          STAPLES.forEach(([label, re]) => { if (re.test(text)) staples.add(label); });
+        });
+        if (key === "meet") meetDays.push(a);
+      });
+    });
+
+    if (meetDays.length) {
+      meetDays.forEach((a) => bagFor(a, "meet").forEach((item) => {
+        COUNTED.forEach(([label, re]) => { if (re.test(item)) counts.set(label, counts.get(label) + 1); });
+      }));
+    }
+
+    const grab = COUNTED
+      .filter(([label]) => counts.get(label) > 0)
+      .map(([label]) => ({ item: label, qty: counts.get(label) }));
+    const meals = STAPLES.filter(([label]) => staples.has(label)).map(([label]) => ({ item: label }));
+    return [
+      ["Snacks and grab-and-go", grab],
+      ["Meals", meals],
+      ["Every week", ALWAYS.map((item) => ({ item }))]
+    ].filter(([, items]) => items.length);
+  }
+
+  function renderFamily() {
+    const tomorrow = addDays(new Date(), 1);
+    $("familyTomorrow").innerHTML = state.list.map((a) => {
+      const key = dayKeyFor(a, tomorrow);
+      const day = dayByKey(a, key);
+      const bag = bagFor(a, key);
+      const when = key === "meet"
+        ? `First race ${fmt(toMinutes(a.raceTime) ?? 600)}`
+        : NO_PRACTICE.has(key) ? "" : `Practice ${fmt(toMinutes(a.practiceStart) ?? 930)}`;
+      return `
+        <div class="fam-card">
+          <div class="fam-head"><b>${esc(athleteLabel(a))}</b><span>${esc(day.chip)}${when ? " · " + esc(when) : ""}</span></div>
+          ${bag.length ? listHTML(bag) : '<p class="footnote">Nothing to pack. Normal meals.</p>'}
+        </div>`;
+    }).join("");
+
+    const dates = weekDates();
+    $("familyWeek").innerHTML = `
+      <table class="fam-week">
+        <thead><tr><th></th>${dates.map((d, i) => `<th scope="col">${i === 0 ? "Today" : esc(WEEKDAYS[d.getDay()].slice(0, 3))}</th>`).join("")}</tr></thead>
+        <tbody>${state.list.map((a) => `
+          <tr><th scope="row">${esc(athleteLabel(a))}</th>${dates.map((d) => {
+            const k = dayKeyFor(a, d);
+            return `<td class="k-${esc(k)}">${esc(dayByKey(a, k).chip)}</td>`;
+          }).join("")}</tr>`).join("")}
+        </tbody>
+      </table>`;
+
+    $("familyShop").innerHTML = buildShopping().map(([group, items]) => `
       <div class="grocery-group">
         <h3>${esc(group)}</h3>
         <div class="grocery-items">
-          ${items.map((item) => `
-            <button type="button" data-item="${esc(item)}" aria-pressed="${cart[item] ? "true" : "false"}">${esc(item)}</button>
+          ${items.map(({ item, qty }) => `
+            <button type="button" data-item="${esc(item)}" aria-pressed="${cart[item] ? "true" : "false"}">${esc(item)}${qty ? ` <span class="qty">×${qty}</span>` : ""}</button>
           `).join("")}
         </div>
       </div>`).join("");
@@ -925,7 +1176,7 @@
 
   /* ---------- views ---------- */
 
-  const VIEWS = ["now", "today", "meet", "week", "more"];
+  const VIEWS = ["now", "today", "meet", "week", "more", "grab", "family"];
   let view = "now";
 
   function renderView() {
@@ -933,7 +1184,9 @@
     else if (view === "today") renderToday();
     else if (view === "meet") renderMeet();
     else if (view === "week") renderWeek();
-    else if (view === "more") renderSetup();
+    else if (view === "more") { renderFoods(); renderSetup(); }
+    else if (view === "grab") renderGrab();
+    else if (view === "family") renderFamily();
   }
 
   function renderAll() {
@@ -944,6 +1197,7 @@
   function show(name, scroll = true) {
     view = VIEWS.includes(name) ? name : "now";
     document.querySelectorAll(".view").forEach((s) => { s.hidden = s.dataset.view !== view; });
+    $("familyBtn").classList.toggle("on", view === "family");
     document.querySelectorAll(".tabbar button").forEach((b) => {
       if (b.dataset.tab === view) b.setAttribute("aria-current", "page");
       else b.removeAttribute("aria-current");
@@ -953,8 +1207,11 @@
   }
 
   const go = (name) => {
-    if (location.hash === "#" + name) show(name);
-    else location.hash = name;
+    // "foods" lives inside More; open it and scroll to the section.
+    const target = name === "foods" ? "more" : name;
+    if (location.hash === "#" + target) show(target);
+    else location.hash = target;
+    if (name === "foods") setTimeout(() => $("foods").scrollIntoView({ behavior: "smooth", block: "start" }), 60);
   };
 
   /* ---------- install ---------- */
@@ -994,7 +1251,6 @@
   /* ---------- wire it up ---------- */
 
   function init() {
-    renderGroceries();
     renderAthleteTabs();
     show((location.hash || "#now").slice(1), false);
     setupInstall();
@@ -1014,6 +1270,7 @@
       state.active = btn.dataset.id;
       persist();
       $("nowChips").hidden = true;
+      if (view === "family") go("now");
       renderAll();
     });
 
@@ -1151,7 +1408,7 @@
       renderAll();
     });
 
-    $("groceryList").addEventListener("click", (e) => {
+    $("familyShop").addEventListener("click", (e) => {
       const btn = e.target.closest("button[data-item]");
       if (!btn) return;
       const item = btn.dataset.item;
@@ -1163,10 +1420,41 @@
     $("resetGroceries").addEventListener("click", () => {
       cart = {};
       store.set(KEY_CART, cart);
-      renderGroceries();
+      renderFamily();
     });
 
     $("assessBtn").addEventListener("click", assess);
+
+    $("foodList").addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-food]");
+      if (!btn) return;
+      const a = activeAthlete();
+      const id = btn.dataset.food;
+      a.dislikes = a.dislikes.includes(id) ? a.dislikes.filter((x) => x !== id) : [...a.dislikes, id];
+      persist();
+      renderFoods();
+    });
+
+    $("grabChips").addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-place]");
+      if (!btn) return;
+      grabPlace = btn.dataset.place;
+      store.set(KEY_GRAB, grabPlace);
+      renderGrab();
+    });
+
+    $("season").addEventListener("change", () => {
+      const a = activeAthlete();
+      a.season = $("season").value;
+      a.week = SEASON_WEEK[a.season][a.discipline].slice();
+      a.override = null;
+      a.scheduleSet = true;
+      persist();
+      renderWeek();
+      flash("weekStatus", `Week reset to a typical ${SEASONS[a.season].label.toLowerCase()} week. Adjust any day below.`);
+    });
+
+    $("familyBtn").addEventListener("click", () => go(view === "family" ? "now" : "family"));
 
     $("printBtn").addEventListener("click", () => {
       renderToday();
