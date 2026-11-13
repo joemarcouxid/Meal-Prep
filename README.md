@@ -6,31 +6,25 @@ Written to be read by the athlete, not about them.
 
 ## What it does
 
-- **Two or more athletes**, switched from the bar at the top, each with their own setup
-- **Two disciplines.** Sprint mode has hard sprints, normal practice, lift + track, easy/drills, rest and meet. Middle distance mode has interval session, tempo, long run, easy miles, lift + run, rest and meet — with its own week template, its own meals and its own meet-day guide
-- A schedule with **real clock times** worked out from that athlete's practice start and length
-- Highlights whichever meal or snack is up next right now
-- Meet mode rebuilds the schedule around the first race time
-- **Portions in hand sizes**, changing by training day, framed as floors rather than targets
-- A one-week meal template you can swap items in and out of
-- A tappable shopping list, shared across athletes
-- A fueling check-in covering energy, hunger, soreness, sleep, illness, bone pain, strength and performance
-- Print view for sticking on the fridge
-- Sources for every principle the app is built on
+- **Opens on "Now".** One big card: what to eat next, when, and how long until then. Below it, the next two slots and what should be in the bag today. After 8:30 PM it flips to "pack tonight for tomorrow".
+- **Set the week once.** Each athlete has a Mon–Sun schedule (hard, lift, easy, rest, meet…). The app picks today's plan from it automatically. A one-day change ("Different training today?") lasts only for that day.
+- **Phone reminders.** The Week tab builds a calendar file with repeating alarms on practice days: mid-morning snack, before practice, right after, and "pack tomorrow's bag". No server needed.
+- **Installs to the home screen and works offline**, so it opens at meets with no signal.
+- Five tabs: Now, Today (full timeline + hand-size portions), Meet (race-time plan + tickable meet bag), Week (schedule, reminders, menu ideas), More (check-in, shopping list, setup, sources).
+- Two disciplines (sprint, middle distance) with separate day types, meals, bags and meet guides. Any number of athletes.
+- Print view prints today's plan for the fridge.
 
 ## Deploy on GitHub Pages
 
 1. Create a repository, e.g. `fuel`.
-2. Put these four files in the **root**:
-   - `index.html`
-   - `styles.css`
-   - `app.js`
-   - `README.md`
+2. Put everything in the **root**: `index.html`, `styles.css`, `app.js`, `manifest.webmanifest`, `sw.js` and the `icons/` folder.
 3. Commit.
 4. **Settings → Pages → Build and deployment**
 5. Source: **Deploy from a branch**. Branch: `main`, folder: `/ (root)`. Save.
 
-GitHub gives you the public URL a minute or two later. On a phone, use "Add to Home Screen" and it opens like an app.
+GitHub gives you the public URL a minute or two later. On a phone, use "Add to Home Screen" (iPhone: Safari → Share) and it opens like an app.
+
+**When you change any file, bump `VERSION` in `sw.js`** (e.g. `fuel-v5.1`). Installed phones keep a cached copy for offline use; the new version string is what tells them to refresh it.
 
 ## Setting it up
 
@@ -41,8 +35,9 @@ The app ships with two blank athletes, one sprint and one middle distance. Name 
 | Name | The switcher tab and the Setup heading |
 | Events | The line in the header |
 | Type of runner | Swaps the whole day set, week template, meals, portions and meet guide |
-| Practice starts | Anchors the pre-training snack, 90 min before |
-| Practice runs about | Anchors recovery and dinner, from when practice ends |
+| Your week (Week tab) | Which plan each day of the week gets |
+| Practice starts (Week tab) | Anchors the pre-training snack, 90 min before |
+| Practice runs about (Week tab) | Anchors recovery and dinner, from when practice ends |
 | Include the period question | Shows or hides that one check-in question |
 
 Meet mode adds a first-race time and rebuilds around that instead.
@@ -51,7 +46,7 @@ Breakfast, mid-morning and lunch are shown as words rather than clock times, bec
 
 The app seeds two athletes on first load: Mia on sprints and Titus on middle distance. Those two names are in `app.js`, in the `seed()` function, which means they are visible in the public repo. Blank the two `name:` strings there if you'd rather they weren't — the app works identically, the tabs just read "Sprinter" and "Middle distance" until someone types a name in Setup.
 
-Seeding only happens on a browser that has never run the app. Once local storage exists, editing `seed()` changes nothing on that device; rename in Setup instead. Bumping `KEY_ATHLETES` to a new version string resets every device back to the seed and discards whatever was saved.
+Seeding only happens on a browser that has never run the app. Once local storage exists, editing `seed()` changes nothing on that device; rename in Setup instead. Saved data from the previous version (`fuelAthletesV4`) is migrated automatically on first load, so names and practice times carry over.
 
 ## Portions
 
@@ -73,6 +68,8 @@ All the food is plain data at the top of `app.js`:
 - `SPRINT_DAYS` / `MIDDLE_DAYS` — the training modes, their copy, meals and portions
 - `SPRINT_WEEK` / `MIDDLE_WEEK` — the seven-day tables
 - `SPRINT_MEET` / `MIDDLE_MEET` — the meet-day guides
+- `SPRINT_BAG` / `MIDDLE_BAG` / `MEET_BAG` — what goes in the bag for each day type
+- `DEFAULT_WEEK` — the starting schedule for a new athlete
 - `ANCHORS` — when each slot happens (a fixed word, or an offset from practice start / practice end / first race)
 - `groceries` — the shopping list
 
@@ -98,7 +95,7 @@ This is an educational planning tool. It does not diagnose or treat anything.
 
 ## Privacy
 
-Everything typed in stays in the browser's local storage on that one device. There is no server, no analytics, and no network request of any kind except the Google Fonts stylesheet in `index.html`. Delete that one `<link>` if you'd rather have zero external requests; the app falls back to system fonts.
+Everything typed in stays in the browser's local storage on that one device. There is no server, no analytics, and no external network request of any kind. Fonts are the phone's own.
 
 ## Files
 
@@ -107,5 +104,8 @@ meal-prep/
 ├── index.html
 ├── styles.css
 ├── app.js
+├── manifest.webmanifest   home-screen install
+├── sw.js                  offline cache (bump VERSION on every change)
+├── icons/
 └── README.md
 ```
